@@ -53,10 +53,55 @@
       }
     },
     {
-      "name": "Get all transactions",
+      "name": "Create transaction (invalid - missing field)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"saleAmount\": 100.00\n}"
+        },
+        "url": "{{baseUrl}}/api/transactions"
+      }
+    },
+    {
+      "name": "List transactions",
       "request": {
         "method": "GET",
-        "url": "{{baseUrl}}/api/transactions"
+        "url": {
+          "raw": "{{baseUrl}}/api/transactions",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "transactions"]
+        }
+      }
+    },
+    {
+      "name": "List transactions (paginated + filtered by status)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/transactions?status=APPROVED&page=0&size=20&sort=createdAt,desc",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "transactions"],
+          "query": [
+            { "key": "status", "value": "APPROVED" },
+            { "key": "page", "value": "0" },
+            { "key": "size", "value": "20" },
+            { "key": "sort", "value": "createdAt,desc" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "List transactions (invalid status filter)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/transactions?status=BANANA",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "transactions"],
+          "query": [{ "key": "status", "value": "BANANA" }]
+        }
       }
     },
     {
@@ -138,25 +183,6 @@
           "raw": "{\n  \"status\": \"APPROVED\"\n}"
         },
         "url": "{{baseUrl}}/api/transactions/00000000-0000-0000-0000-000000000000/status"
-      }
-    },
-    {
-      "name": "Echo GET",
-      "request": {
-        "method": "GET",
-        "url": "{{baseUrl}}/echo?message=salut"
-      }
-    },
-    {
-      "name": "Echo POST",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"oricare\": \"camp\"\n}"
-        },
-        "url": "{{baseUrl}}/echo"
       }
     }
   ]
