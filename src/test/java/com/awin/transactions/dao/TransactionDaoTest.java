@@ -39,11 +39,13 @@ class TransactionDaoTest {
     @Autowired
     private TestEntityManager entityManager;
 
+    /** The Flyway seed rows would otherwise skew {@code findAll}/pagination assertions. */
     @BeforeEach
     void removeSeedData() {
         entityManager.getEntityManager().createQuery("delete from Transaction").executeUpdate();
     }
 
+    /** A saved transaction gets an id, starts as {@code PENDING}, and has both timestamps set. */
     @Test
     void savePersistsTransactionAsPending() {
         Transaction saved = transactionDao.save(newTransaction("100.00", "5.00"));
@@ -56,6 +58,7 @@ class TransactionDaoTest {
         assertThat(saved.getUpdatedAt()).isNotNull();
     }
 
+    /** A saved transaction can be looked up again by its id. */
     @Test
     void findByIdReturnsSavedTransaction() {
         Transaction saved = transactionDao.save(newTransaction("50.00", "2.50"));
@@ -67,11 +70,13 @@ class TransactionDaoTest {
                 .isEqualTo(saved.getSaleAmount());
     }
 
+    /** Looking up a random id that was never saved returns nothing, not an exception. */
     @Test
     void findByIdReturnsEmptyForUnknownId() {
         assertThat(transactionDao.findById(UUID.randomUUID())).isEmpty();
     }
 
+    /** A null status filter means "no filter": every transaction comes back. */
     @Test
     void findAllReturnsEveryTransactionWhenStatusIsNull() {
         transactionDao.save(newTransaction("10.00", "1.00"));
@@ -82,6 +87,7 @@ class TransactionDaoTest {
         assertThat(page.getTotalElements()).isEqualTo(2);
     }
 
+    /** Only transactions matching the given status are returned. */
     @Test
     void findAllFiltersByStatus() {
         transactionDao.save(newTransaction("10.00", "1.00"));
@@ -95,6 +101,7 @@ class TransactionDaoTest {
                 .allMatch(transaction -> transaction.getStatus() == TransactionStatus.APPROVED);
     }
 
+    /** A smaller page size splits the results across multiple pages. */
     @Test
     void findAllAppliesPagination() {
         transactionDao.save(newTransaction("10.00", "1.00"));
@@ -108,6 +115,7 @@ class TransactionDaoTest {
         assertThat(firstPage.getTotalPages()).isEqualTo(2);
     }
 
+    /** The locking read used before a review still finds the transaction. */
     @Test
     void findByIdForUpdateReturnsTransaction() {
         Transaction saved = transactionDao.save(newTransaction("15.00", "1.50"));
@@ -119,10 +127,12 @@ class TransactionDaoTest {
                 .isEqualTo(saved.getId());
     }
 
+    /** @return an unsaved, {@code PENDING} transaction with the given amounts. */
     private Transaction newTransaction(String saleAmount, String commissionAmount) {
         return new Transaction(new BigDecimal(saleAmount), new BigDecimal(commissionAmount));
     }
 
+    /** @return the same transaction after applying the given review decision. */
     private Transaction reviewed(Transaction transaction, TransactionStatus decision) {
         transaction.review(decision);
         return transaction;

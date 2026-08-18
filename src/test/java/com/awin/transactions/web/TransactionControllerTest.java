@@ -44,6 +44,7 @@ class TransactionControllerTest {
     @MockitoBean
     private TransactionService transactionService;
 
+    /** A successful create returns 201 with a Location pointing at the new resource. */
     @Test
     void createReturns201WithLocationHeader() throws Exception {
         given(transactionService.create(any(CreateTransactionRequest.class)))
@@ -57,6 +58,7 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.status").value("PENDING"));
     }
 
+    /** {@code saleAmount <= 0} is rejected before the service is ever called. */
     @Test
     void createRejectsNonPositiveSaleAmount() throws Exception {
         mockMvc.perform(post("/api/transactions")
@@ -66,6 +68,7 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.errors.saleAmount").exists());
     }
 
+    /** A missing required field fails bean validation with a 400. */
     @Test
     void createRejectsMissingCommissionAmount() throws Exception {
         mockMvc.perform(post("/api/transactions")
@@ -75,6 +78,7 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.errors.commissionAmount").exists());
     }
 
+    /** The listing endpoint serializes the service's page response as-is. */
     @Test
     void listReturnsPagedResponse() throws Exception {
         given(transactionService.findAll(eq(null), any()))
@@ -87,6 +91,7 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.totalElements").value(1));
     }
 
+    /** The {@code status} query param is parsed and forwarded to the service. */
     @Test
     void listPassesStatusFilterToService() throws Exception {
         given(transactionService.findAll(eq(TransactionStatus.APPROVED), any()))
@@ -97,12 +102,14 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.content[0].status").value("APPROVED"));
     }
 
+    /** A status value that isn't a valid enum constant fails Spring's parameter binding. */
     @Test
     void listRejectsUnknownStatusFilter() throws Exception {
         mockMvc.perform(get("/api/transactions").param("status", "BANANA"))
                 .andExpect(status().isBadRequest());
     }
 
+    /** A known id returns the transaction the service provides. */
     @Test
     void getByIdReturnsTransaction() throws Exception {
         given(transactionService.findById(TRANSACTION_ID)).willReturn(response(TransactionStatus.PENDING));
@@ -112,6 +119,7 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.id").value(TRANSACTION_ID.toString()));
     }
 
+    /** {@link TransactionNotFoundException} from the service is translated to a 404. */
     @Test
     void getByIdReturns404WhenMissing() throws Exception {
         given(transactionService.findById(TRANSACTION_ID))
@@ -121,6 +129,7 @@ class TransactionControllerTest {
                 .andExpect(status().isNotFound());
     }
 
+    /** A successful review returns 200 with the updated transaction. */
     @Test
     void reviewReturnsUpdatedTransaction() throws Exception {
         given(transactionService.review(eq(TRANSACTION_ID), any(ReviewTransactionRequest.class)))
@@ -133,6 +142,7 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.status").value("APPROVED"));
     }
 
+    /** {@link TransactionAlreadyReviewedException} from the service is translated to a 409. */
     @Test
     void reviewReturns409WhenAlreadyReviewed() throws Exception {
         willThrow(new TransactionAlreadyReviewedException(TRANSACTION_ID, TransactionStatus.APPROVED))
@@ -144,6 +154,7 @@ class TransactionControllerTest {
                 .andExpect(status().isConflict());
     }
 
+    /** {@link InvalidTransactionStatusException} from the service is translated to a 400. */
     @Test
     void reviewRejectsDecisionOtherThanApprovedOrDeclined() throws Exception {
         willThrow(new InvalidTransactionStatusException("PENDING"))
@@ -155,6 +166,7 @@ class TransactionControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    /** A blank status body fails bean validation before the service is called. */
     @Test
     void reviewRejectsBlankStatus() throws Exception {
         mockMvc.perform(patch("/api/transactions/{id}/status", TRANSACTION_ID)
@@ -164,6 +176,7 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.errors.status").exists());
     }
 
+    /** @return a stub response with a fixed id/amounts/timestamps and the given status. */
     private TransactionResponse response(TransactionStatus status) {
         Instant now = Instant.parse("2026-08-18T10:00:00Z");
         return new TransactionResponse(
