@@ -40,6 +40,7 @@ public class Transaction {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    /** Required by JPA; not for application use. */
     protected Transaction() {
     }
 

@@ -1,0 +1,163 @@
+{
+  "info": {
+    "name": "Transactions API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "transactionId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health check",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/actuator/health"
+      }
+    },
+    {
+      "name": "Create transaction (valid)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "  pm.collectionVariables.set('transactionId', pm.response.json().id);",
+              "}",
+              "pm.test('Status is 201', () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"saleAmount\": 100.00,\n  \"commissionAmount\": 10.00\n}"
+        },
+        "url": "{{baseUrl}}/api/transactions"
+      }
+    },
+    {
+      "name": "Create transaction (invalid - negative amount)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"saleAmount\": -5,\n  \"commissionAmount\": 10.00\n}"
+        },
+        "url": "{{baseUrl}}/api/transactions"
+      }
+    },
+    {
+      "name": "Get all transactions",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/transactions"
+      }
+    },
+    {
+      "name": "Get transaction by id",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/transactions/{{transactionId}}"
+      }
+    },
+    {
+      "name": "Get transaction by id (not found)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/transactions/00000000-0000-0000-0000-000000000000"
+      }
+    },
+    {
+      "name": "Get transaction by id (malformed id)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/transactions/not-a-uuid"
+      }
+    },
+    {
+      "name": "Review transaction - APPROVE",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"APPROVED\"\n}"
+        },
+        "url": "{{baseUrl}}/api/transactions/{{transactionId}}/status"
+      }
+    },
+    {
+      "name": "Review transaction - DECLINE",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"DECLINED\"\n}"
+        },
+        "url": "{{baseUrl}}/api/transactions/{{transactionId}}/status"
+      }
+    },
+    {
+      "name": "Review transaction - already reviewed (conflict)",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"DECLINED\"\n}"
+        },
+        "url": "{{baseUrl}}/api/transactions/{{transactionId}}/status"
+      }
+    },
+    {
+      "name": "Review transaction - invalid status value",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"BANANA\"\n}"
+        },
+        "url": "{{baseUrl}}/api/transactions/{{transactionId}}/status"
+      }
+    },
+    {
+      "name": "Review transaction - not found",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"APPROVED\"\n}"
+        },
+        "url": "{{baseUrl}}/api/transactions/00000000-0000-0000-0000-000000000000/status"
+      }
+    },
+    {
+      "name": "Echo GET",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/echo?message=salut"
+      }
+    },
+    {
+      "name": "Echo POST",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"oricare\": \"camp\"\n}"
+        },
+        "url": "{{baseUrl}}/echo"
+      }
+    }
+  ]
+}
