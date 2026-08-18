@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.awin.transactions.service.TransactionService;
 import com.awin.transactions.web.dto.CreateTransactionRequest;
+import com.awin.transactions.web.dto.ReviewTransactionRequest;
 import com.awin.transactions.web.dto.TransactionResponse;
 
 import jakarta.validation.Valid;
@@ -42,5 +44,10 @@ public class TransactionController {
     @GetMapping("/{id}")
     public TransactionResponse getById(@PathVariable UUID id) {
         return transactionService.findById(id);
+    }
+
+    @PatchMapping("/{id}/status")
+    public TransactionResponse review(@PathVariable UUID id, @Valid @RequestBody ReviewTransactionRequest request) {
+        return transactionService.review(id, request);
     }
 }

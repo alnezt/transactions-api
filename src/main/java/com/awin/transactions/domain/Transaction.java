@@ -14,6 +14,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
+import com.awin.transactions.exception.TransactionAlreadyReviewedException;
+
 @Entity
 @Table(name = "transactions")
 public class Transaction {
@@ -52,6 +54,14 @@ public class Transaction {
         Instant now = Instant.now();
         createdAt = now;
         updatedAt = now;
+    }
+
+    public void review(TransactionStatus decision) {
+        if (status != TransactionStatus.PENDING) {
+            throw new TransactionAlreadyReviewedException(id, status);
+        }
+        status = decision;
+        updatedAt = Instant.now();
     }
 
     public UUID getId() {

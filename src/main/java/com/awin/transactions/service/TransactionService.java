@@ -7,9 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.awin.transactions.domain.Transaction;
+import com.awin.transactions.domain.TransactionStatus;
 import com.awin.transactions.exception.TransactionNotFoundException;
 import com.awin.transactions.repository.TransactionRepository;
 import com.awin.transactions.web.dto.CreateTransactionRequest;
+import com.awin.transactions.web.dto.ReviewTransactionRequest;
 import com.awin.transactions.web.dto.TransactionResponse;
 
 @Service
@@ -26,6 +28,15 @@ public class TransactionService {
     public TransactionResponse create(CreateTransactionRequest request) {
         Transaction transaction = new Transaction(request.saleAmount(), request.commissionAmount());
         return TransactionResponse.from(transactionRepository.save(transaction));
+    }
+
+    @Transactional
+    public TransactionResponse review(UUID id, ReviewTransactionRequest request) {
+        TransactionStatus decision = TransactionStatus.reviewDecisionOf(request.status());
+        Transaction transaction = transactionRepository.findByIdForReview(id)
+                .orElseThrow(() -> new TransactionNotFoundException(id));
+        transaction.review(decision);
+        return TransactionResponse.from(transaction);
     }
 
     public List<TransactionResponse> findAll() {
