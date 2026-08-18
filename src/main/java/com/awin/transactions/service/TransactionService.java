@@ -20,16 +20,19 @@ public class TransactionService {
 
     private final TransactionDao transactionDao;
 
+    /** @param transactionDao the persistence gateway for transactions. */
     public TransactionService(TransactionDao transactionDao) {
         this.transactionDao = transactionDao;
     }
 
+    /** Records a new transaction in {@code PENDING} status. */
     @Transactional
     public TransactionResponse create(CreateTransactionRequest request) {
         Transaction transaction = new Transaction(request.saleAmount(), request.commissionAmount());
         return TransactionResponse.from(transactionDao.save(transaction));
     }
 
+    /** Approves or declines a pending transaction. */
     @Transactional
     public TransactionResponse review(UUID id, ReviewTransactionRequest request) {
         TransactionStatus decision = TransactionStatus.reviewDecisionOf(request.status());
@@ -39,12 +42,14 @@ public class TransactionService {
         return TransactionResponse.from(transaction);
     }
 
+    /** @return all transactions. */
     public List<TransactionResponse> findAll() {
         return transactionDao.findAll().stream()
                 .map(TransactionResponse::from)
                 .toList();
     }
 
+    /** @return the transaction with this id. */
     public TransactionResponse findById(UUID id) {
         return transactionDao.findById(id)
                 .map(TransactionResponse::from)

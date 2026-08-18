@@ -12,6 +12,7 @@ public enum TransactionStatus {
 
     private static final Set<TransactionStatus> REVIEW_DECISIONS = Set.of(APPROVED, DECLINED);
 
+    /** Parses a review decision; throws if {@code value} isn't APPROVED or DECLINED. */
     public static TransactionStatus reviewDecisionOf(String value) {
         try {
             TransactionStatus status = valueOf(value.trim().toUpperCase(Locale.ROOT));

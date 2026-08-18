@@ -14,6 +14,7 @@ import jakarta.persistence.LockModeType;
 
 public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
 
+    /** Same as {@link #findById}, but takes a pessimistic write lock on the row. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select t from Transaction t where t.id = :id")
     Optional<Transaction> findByIdForReview(@Param("id") UUID id);

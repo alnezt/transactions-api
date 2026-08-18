@@ -7,6 +7,14 @@ import java.util.UUID;
 import com.awin.transactions.domain.Transaction;
 import com.awin.transactions.domain.TransactionStatus;
 
+/**
+ * @param id                the transaction id.
+ * @param status            the current status.
+ * @param saleAmount        the sale amount.
+ * @param commissionAmount  the commission amount.
+ * @param createdAt         when the transaction was created.
+ * @param updatedAt         when the transaction was last updated.
+ */
 public record TransactionResponse(
         UUID id,
         TransactionStatus status,
@@ -15,6 +23,7 @@ public record TransactionResponse(
         Instant createdAt,
         Instant updatedAt) {
 
+    /** @return a response built from the given entity. */
     public static TransactionResponse from(Transaction transaction) {
         return new TransactionResponse(
                 transaction.getId(),

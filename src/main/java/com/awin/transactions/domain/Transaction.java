@@ -43,6 +43,7 @@ public class Transaction {
     protected Transaction() {
     }
 
+    /** Creates a new transaction in {@code PENDING} status. */
     public Transaction(BigDecimal saleAmount, BigDecimal commissionAmount) {
         this.status = TransactionStatus.PENDING;
         this.saleAmount = saleAmount;
@@ -56,6 +57,7 @@ public class Transaction {
         updatedAt = now;
     }
 
+    /** Applies an approve/decline decision; fails if the transaction was already reviewed. */
     public void review(TransactionStatus decision) {
         if (status != TransactionStatus.PENDING) {
             throw new TransactionAlreadyReviewedException(id, status);
@@ -64,26 +66,32 @@ public class Transaction {
         updatedAt = Instant.now();
     }
 
+    /** @return the transaction id. */
     public UUID getId() {
         return id;
     }
 
+    /** @return the current status. */
     public TransactionStatus getStatus() {
         return status;
     }
 
+    /** @return the sale amount. */
     public BigDecimal getSaleAmount() {
         return saleAmount;
     }
 
+    /** @return the commission amount. */
     public BigDecimal getCommissionAmount() {
         return commissionAmount;
     }
 
+    /** @return when the transaction was created. */
     public Instant getCreatedAt() {
         return createdAt;
     }
 
+    /** @return when the transaction was last updated. */
     public Instant getUpdatedAt() {
         return updatedAt;
     }

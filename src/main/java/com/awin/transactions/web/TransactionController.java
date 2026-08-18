@@ -26,26 +26,31 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
+    /** @param transactionService the service handling transaction use cases. */
     public TransactionController(TransactionService transactionService) {
         this.transactionService = transactionService;
     }
 
+    /** Creates a transaction in {@code PENDING} status. */
     @PostMapping
     public ResponseEntity<TransactionResponse> create(@Valid @RequestBody CreateTransactionRequest request) {
         TransactionResponse created = transactionService.create(request);
         return ResponseEntity.created(URI.create("/api/transactions/" + created.id())).body(created);
     }
 
+    /** Lists all transactions. */
     @GetMapping
     public List<TransactionResponse> getAll() {
         return transactionService.findAll();
     }
 
+    /** Fetches a single transaction by id; 404 if it doesn't exist. */
     @GetMapping("/{id}")
     public TransactionResponse getById(@PathVariable UUID id) {
         return transactionService.findById(id);
     }
 
+    /** Approves or declines a pending transaction; 409 if it was already reviewed. */
     @PatchMapping("/{id}/status")
     public TransactionResponse review(@PathVariable UUID id, @Valid @RequestBody ReviewTransactionRequest request) {
         return transactionService.review(id, request);
