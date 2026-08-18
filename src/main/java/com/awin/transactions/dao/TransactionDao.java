@@ -1,13 +1,16 @@
 package com.awin.transactions.dao;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.awin.transactions.domain.Transaction;
+import com.awin.transactions.domain.TransactionStatus;
 import com.awin.transactions.repository.TransactionRepository;
+import com.awin.transactions.repository.TransactionSpecifications;
 
 @Repository
 public class TransactionDao {
@@ -24,9 +27,9 @@ public class TransactionDao {
         return transactionRepository.save(transaction);
     }
 
-    /** Returns all transactions. */
-    public List<Transaction> findAll() {
-        return transactionRepository.findAll();
+    /** @return a page of transactions, optionally filtered by status. */
+    public Page<Transaction> findAll(TransactionStatus status, Pageable pageable) {
+        return transactionRepository.findAll(TransactionSpecifications.hasStatus(status), pageable);
     }
 
     /** @return the transaction with this id, if it exists. */

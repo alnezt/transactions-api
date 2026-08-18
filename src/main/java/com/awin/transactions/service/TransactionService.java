@@ -1,8 +1,8 @@
 package com.awin.transactions.service;
 
-import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +11,7 @@ import com.awin.transactions.domain.Transaction;
 import com.awin.transactions.domain.TransactionStatus;
 import com.awin.transactions.exception.TransactionNotFoundException;
 import com.awin.transactions.web.dto.CreateTransactionRequest;
+import com.awin.transactions.web.dto.PageResponse;
 import com.awin.transactions.web.dto.ReviewTransactionRequest;
 import com.awin.transactions.web.dto.TransactionResponse;
 
@@ -42,11 +43,9 @@ public class TransactionService {
         return TransactionResponse.from(transaction);
     }
 
-    /** @return all transactions. */
-    public List<TransactionResponse> findAll() {
-        return transactionDao.findAll().stream()
-                .map(TransactionResponse::from)
-                .toList();
+    /** @return a page of transactions, optionally filtered by status. */
+    public PageResponse<TransactionResponse> findAll(TransactionStatus status, Pageable pageable) {
+        return PageResponse.from(transactionDao.findAll(status, pageable).map(TransactionResponse::from));
     }
 
     /** @return the transaction with this id. */
